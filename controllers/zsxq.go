@@ -1,13 +1,20 @@
 package controllers
 
 import (
+	"errors"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yann0917/knowledge/base"
 	"github.com/yann0917/knowledge/models"
+	"github.com/yann0917/knowledge/service"
+	"gorm.io/gorm"
 )
+
+const PageSize = 20   //
+const PullDelay = 300 // 延迟 ms
 
 func UserSelf(c *gin.Context) {
 	ctl := base.NewController(c)
@@ -39,11 +46,47 @@ func SyncGroups(c *gin.Context) {
 func SyncTopics(c *gin.Context) {
 	ctl := base.NewController(c)
 	id := c.Param("id")
-	list, err := svc.GetGroupTopics(id, "digests", "20", "")
-	if err != nil {
+	var topic models.Topic
+	topic.GroupID, _ = base.String2Int64(id)
+	lastTopic, err := topic.GetLast()
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		ctl.Error(err)
 		return
 	}
+	endTime := ""
+	if !lastTopic.CreatedTime.IsZero() {
+		endTime = base.TimeToStr(lastTopic.CreatedTime.Add(-1 * time.Second))
+	}
+	// list, err := svc.GetGroupTopics(id, "digests", "20", endTime)
+	// if err != nil {
+	// 	ctl.Error(err)
+	// 	return
+	// }
+	waitGroup := sync.WaitGroup{}
+	for {
+		list, err1 := svc.GetGroupTopics(id, "all", "20", endTime)
+		if err1 != nil {
+			ctl.Error(err1)
+			return
+		}
+
+		lenTopic := len(list.Topics)
+		if lenTopic < PageSize {
+			break
+		}
+
+		endTime = list.Topics[lenTopic-1].CreateTime
+
+		waitGroup.Add(1)
+		go saveTopicsByPage(&waitGroup, list)
+		time.Sleep(PullDelay * time.Millisecond)
+	}
+	waitGroup.Wait()
+
+	ctl.Success(1)
+}
+
+func saveTopicsByPage(w *sync.WaitGroup, list service.Topics) {
 
 	for _, t := range list.Topics {
 		var topic models.Topic
@@ -63,7 +106,6 @@ func SyncTopics(c *gin.Context) {
 			if topic.ArticleURL != "" {
 				article, err1 := svc.GetArticle(topic.ArticleURL)
 				if err1 != nil {
-					ctl.Error(err1)
 					return
 				}
 				topic.RichContent = article
@@ -72,11 +114,11 @@ func SyncTopics(c *gin.Context) {
 		if t.Type == "q&a" {
 			topic.Content = t.Answer.Text + "\n\n" + t.Question.Text
 		}
-		topic.CreatedTime = base.JSONTime{Time: base.StrToTime(t.CreateTime)}
+		topic.CreatedTime = base.StrToTime(t.CreateTime)
 
 		topic.FirstOrUpdate()
 	}
-	ctl.Success(list)
+	w.Done()
 }
 
 func SyncColumns(c *gin.Context) {
@@ -124,7 +166,7 @@ func SyncColumns(c *gin.Context) {
 			if info.Topic.Type == "q&a" {
 				topic.Content = info.Topic.Answer.Text + "\n\n" + info.Topic.Question.Text
 			}
-			topic.CreatedTime = base.JSONTime{Time: base.StrToTime(info.Topic.CreateTime)}
+			topic.CreatedTime = base.StrToTime(info.Topic.CreateTime)
 			topic.FirstOrUpdate()
 		}
 	}

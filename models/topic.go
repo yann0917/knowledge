@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/yann0917/knowledge/base"
 	"github.com/yann0917/knowledge/config"
 )
@@ -14,7 +16,7 @@ type Topic struct {
 	Images      string        `json:"images"`
 	ArticleID   string        `json:"article_id"`
 	ArticleURL  string        `json:"article_url"`
-	CreatedTime base.JSONTime `json:"created_time"`
+	CreatedTime time.Time     `json:"created_time"`
 	CreatedAt   base.JSONTime `json:"created_at"`
 	UpdatedAt   base.JSONTime `json:"updated_at"`
 	DeletedAt   base.JSONTime `json:"-"`
@@ -46,5 +48,13 @@ func (g *Topic) FirstOrUpdate() (detail Topic, err error) {
 func (g *Topic) List(list []Topic, err error) {
 	db := config.DB.Order("created_at DESC")
 	err = db.Find(&list).Error
+	return
+}
+
+func (g *Topic) GetLast() (detail Topic, err error) {
+	db := config.DB.Where(g).Order("created_time asc")
+	err = db.
+		First(&detail).
+		Error
 	return
 }

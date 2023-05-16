@@ -2,8 +2,11 @@ package service
 
 import (
 	"io"
+	"strconv"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/go-resty/resty/v2"
 )
 
 func (s *Service) GetSettings() (io.ReadCloser, error) {
@@ -166,7 +169,14 @@ func (s *Service) GetTopicInfo(topicID string) (info TopicInfo, err error) {
 }
 
 func (s *Service) GetArticle(url string) (info string, err error) {
-	resp, err := s.client.SetBaseURL("").R().
+	client := resty.New()
+	client.SetDebug(true).
+		SetCookies(s.client.Cookies).
+		SetHeader("User-Agent", UserAgent).
+		SetHeader("Accept", "application/json, text/plain, */*").
+		SetHeader("X-Timestamp", strconv.FormatInt(time.Now().Unix(), 10)).
+		SetHeader("X-Version", "2.37.0")
+	resp, err := client.R().
 		Get(url)
 	if err != nil {
 		return
