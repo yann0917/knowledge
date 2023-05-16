@@ -33,9 +33,14 @@ type Columns struct {
 }
 
 type Group struct {
-	GroupId int64  `json:"group_id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
+	GroupId       int64  `json:"group_id"`
+	Name          string `json:"name"`
+	Type          string `json:"type"`
+	BackgroundURL string `json:"background_url"`
+}
+
+type Groups struct {
+	Groups []Group `json:"groups"`
 }
 
 type User struct {
@@ -49,7 +54,7 @@ type User struct {
 	UniqueId    string `json:"unique_id,omitempty"`
 }
 
-type T2 struct {
+type UserInfo struct {
 	User User `json:"user"`
 	Chat struct {
 		Identifier string `json:"identifier"`
@@ -75,8 +80,8 @@ type T2 struct {
 
 type Article struct {
 	Title            string `json:"title"`
-	ArticleId        string `json:"article_id"`
-	ArticleUrl       string `json:"article_url"`
+	ArticleID        string `json:"article_id"`
+	ArticleURL       string `json:"article_url"`
 	InlineArticleUrl string `json:"inline_article_url"`
 }
 
@@ -105,81 +110,50 @@ type File struct {
 	Duration      int    `json:"duration"`
 }
 
-type Topics struct {
-	Topics []struct {
-		TopicId int64  `json:"topic_id"`
-		Group   Group  `json:"group"`
-		Type    string `json:"type"`
-		Talk    struct {
-			Owner   User    `json:"owner"`
-			Text    string  `json:"text"`
-			Article Article `json:"article,omitempty"`
-			Images  []Image `json:"images,omitempty"`
-			Files   []File  `json:"files,omitempty"`
-		} `json:"talk"`
-		LatestLikes []struct {
-			CreateTime string `json:"create_time"`
-			Owner      User   `json:"owner"`
-		} `json:"latest_likes"`
-		ShowComments []struct {
-			CommentId       int64   `json:"comment_id"`
-			CreateTime      string  `json:"create_time"`
-			Owner           User    `json:"owner"`
-			Text            string  `json:"text"`
-			LikesCount      int     `json:"likes_count"`
-			RewardsCount    int     `json:"rewards_count"`
-			Sticky          bool    `json:"sticky"`
-			RepliesCount    int     `json:"replies_count,omitempty"`
-			ParentCommentId int64   `json:"parent_comment_id,omitempty"`
-			Repliee         User    `json:"repliee,omitempty"`
-			Images          []Image `json:"images,omitempty"`
-		} `json:"show_comments,omitempty"`
-		LikesCount    int    `json:"likes_count"`
-		RewardsCount  int    `json:"rewards_count"`
-		CommentsCount int    `json:"comments_count"`
-		ReadingCount  int    `json:"reading_count"`
-		ReadersCount  int    `json:"readers_count"`
-		Digested      bool   `json:"digested"`
-		Sticky        bool   `json:"sticky"`
-		CreateTime    string `json:"create_time"`
-		ModifyTime    string `json:"modify_time,omitempty"`
-		UserSpecific  struct {
-			Liked      bool `json:"liked"`
-			Subscribed bool `json:"subscribed"`
-		} `json:"user_specific"`
-		Title   string `json:"title,omitempty"`
-		Columns []struct {
-			ColumnId int64  `json:"column_id"`
-			Name     string `json:"name"`
-		} `json:"columns"`
-	} `json:"topics"`
+type Question struct {
+	Owner  User    `json:"owner"`  // 提问者
+	Text   string  `json:"text"`   // 问题内容
+	Images []Image `json:"images"` // 问题图片
+}
+
+type Answer struct {
+	Owner  User    `json:"owner"`  // 回答者
+	Text   string  `json:"text"`   // 回答内容
+	Images []Image `json:"images"` // 回答图片
+}
+
+type ShowComment struct {
+	CommentId       int64   `json:"comment_id"`
+	CreateTime      string  `json:"create_time"`
+	Owner           User    `json:"owner"`
+	Text            string  `json:"text"`
+	LikesCount      int     `json:"likes_count"`
+	RewardsCount    int     `json:"rewards_count"`
+	Sticky          bool    `json:"sticky"`
+	RepliesCount    int     `json:"replies_count,omitempty"`
+	ParentCommentId int64   `json:"parent_comment_id,omitempty"`
+	Repliee         User    `json:"repliee,omitempty"`
+	Images          []Image `json:"images,omitempty"`
 }
 
 type Topic struct {
-	TopicId int64  `json:"topic_id"`
-	Group   Group  `json:"group"`
-	Type    string `json:"type"`
-	Talk    struct {
+	Question Question `json:"question"` // 提问
+	Answer   Answer   `json:"answer"`   // 回答
+	TopicId  int64    `json:"topic_id"`
+	Group    Group    `json:"group"`
+	Type     string   `json:"type"`
+	Talk     struct {
 		Owner   User    `json:"owner"`
 		Text    string  `json:"text"`
-		Article Article `json:"article"`
+		Article Article `json:"article,omitempty"`
+		Images  []Image `json:"images,omitempty"`
+		Files   []File  `json:"files,omitempty"`
 	} `json:"talk"`
-	LatestLikes []struct {
-		CreateTime string `json:"create_time"`
-		Owner      User   `json:"owner"`
-	} `json:"latest_likes"`
-	ShowComments []struct {
-		CommentId       int64  `json:"comment_id"`
-		CreateTime      string `json:"create_time"`
-		Owner           User   `json:"owner"`
-		Text            string `json:"text"`
-		LikesCount      int    `json:"likes_count"`
-		RewardsCount    int    `json:"rewards_count"`
-		Sticky          bool   `json:"sticky"`
-		RepliesCount    int    `json:"replies_count,omitempty"`
-		ParentCommentId int64  `json:"parent_comment_id,omitempty"`
-		Repliee         User   `json:"repliee,omitempty"`
-	} `json:"show_comments"`
+	// LatestLikes []struct {
+	// 	CreateTime string `json:"create_time"`
+	// 	Owner      User   `json:"owner"`
+	// } `json:"latest_likes"`
+	// ShowComments  []ShowComment `json:"show_comments"`
 	LikesCount    int    `json:"likes_count"`
 	RewardsCount  int    `json:"rewards_count"`
 	CommentsCount int    `json:"comments_count"`
@@ -199,10 +173,15 @@ type Topic struct {
 	} `json:"columns"`
 }
 
+type Topics struct {
+	Topics []Topic `json:"topics"`
+}
+
 type TopicInfo struct {
 	Topic Topic  `json:"topic"`
 	Type  string `json:"type"`
 }
+
 type Comment struct {
 	CommentId       int64   `json:"comment_id"`
 	CreateTime      string  `json:"create_time"`

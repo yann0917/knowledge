@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/yann0917/knowledge/base"
+	"github.com/yann0917/knowledge/config"
 )
 
 type Group struct {
@@ -11,4 +12,27 @@ type Group struct {
 	CreatedAt base.JSONTime `json:"created_at"`
 	UpdatedAt base.JSONTime `json:"updated_at"`
 	DeletedAt base.JSONTime `json:"-"`
+}
+
+func (g *Group) TableName() string {
+	return "group"
+}
+
+// FirstOrUpdate 创建或更新
+func (g *Group) FirstOrUpdate() (detail Group, err error) {
+	if err = config.DB.Where(&Group{GroupID: g.GroupID}).
+		Assign(&Group{
+			GroupID: g.GroupID,
+			Name:    g.Name,
+		}).
+		FirstOrCreate(&detail).Error; err != nil {
+		return
+	}
+	return
+}
+
+func (g *Group) List(list []Group, err error) {
+	db := config.DB.Order("created_at DESC")
+	err = db.Find(&list).Error
+	return
 }

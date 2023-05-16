@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/mitchellh/mapstructure"
@@ -15,7 +17,7 @@ import (
 
 var (
 	BaseURL   = "https://api.zsxq.com/v2"
-	UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+	UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 )
 
 // Response response
@@ -80,7 +82,9 @@ func NewService(co *CookieOptions) *Service {
 	client.SetBaseURL(BaseURL).
 		SetCookies(cookies).
 		SetHeader("User-Agent", UserAgent).
-		SetHeader("Accept", "application/json, text/plain, */*")
+		SetHeader("Accept", "application/json, text/plain, */*").
+		SetHeader("X-Timestamp", strconv.FormatInt(time.Now().Unix(), 10)).
+		SetHeader("X-Version", "2.37.0")
 
 	return &Service{client: client}
 }
@@ -122,7 +126,7 @@ func handleJSONParse(reader io.Reader, v interface{}) error {
 		return err
 	}
 	if !result.isSuccess() {
-		err = errors.New("服务异常，请稍后重试。errMsg:")
+		err = errors.New("接口请求异常，请稍后重试。errMsg:" + result.Info)
 		return err
 	}
 	err = base.UnmarshalJSON(result.RespData, v)

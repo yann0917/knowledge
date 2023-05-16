@@ -18,8 +18,9 @@ func InitRouter() *gin.Engine {
 
 	zsxq := r.Group("/zsxq")
 	{
+		zsxq.GET("/user/self", UserSelf)
 		zsxq.GET("/sync/group", SyncGroups)
-		zsxq.GET("/sync/topic", SyncTopics)
+		zsxq.GET("/sync/:id/topic", SyncTopics)
 	}
 
 	return r
