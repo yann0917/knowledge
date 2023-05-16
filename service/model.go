@@ -208,3 +208,15 @@ type Comment struct {
 type Comments struct {
 	Comments []Comment `json:"comments"`
 }
+
+type ColumnTopic struct {
+	TopicId              int64  `json:"topic_id"`
+	Title                string `json:"title"`
+	Text                 string `json:"text"`
+	CreateTime           string `json:"create_time"`
+	AttachedToColumnTime string `json:"attached_to_column_time"`
+}
+
+type ColumnTopics struct {
+	Topics []ColumnTopic `json:"topics,omitempty"`
+}

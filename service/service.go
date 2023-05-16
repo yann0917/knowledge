@@ -78,7 +78,7 @@ func NewService(co *CookieOptions) *Service {
 		Domain: "wx.zsxq.com",
 	})
 	client := resty.New()
-	client.SetDebug(true)
+	// client.SetDebug(true)
 	client.SetBaseURL(BaseURL).
 		SetCookies(cookies).
 		SetHeader("User-Agent", UserAgent).

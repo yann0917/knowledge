@@ -10,6 +10,7 @@ type Topic struct {
 	GroupID     int64         `json:"group_id"`
 	TopicID     int64         `json:"topic_id"`
 	Content     string        `json:"content"`
+	RichContent string        `json:"rich_content"`
 	Images      string        `json:"images"`
 	ArticleID   string        `json:"article_id"`
 	ArticleURL  string        `json:"article_url"`
@@ -30,6 +31,7 @@ func (g *Topic) FirstOrUpdate() (detail Topic, err error) {
 			GroupID:     g.GroupID,
 			TopicID:     g.TopicID,
 			Content:     g.Content,
+			RichContent: g.RichContent,
 			Images:      g.Images,
 			ArticleID:   g.ArticleID,
 			ArticleURL:  g.ArticleURL,

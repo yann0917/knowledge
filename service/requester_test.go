@@ -37,5 +37,5 @@ func TestService_GetMenus(t *testing.T) {
 }
 
 func TestService_GetTopics(t *testing.T) {
-	service.GetTopics("4224888828", "digests", "20", "")
+	service.GetGroupTopics("4224888828", "digests", "20", "")
 }
