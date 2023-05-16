@@ -31,6 +31,7 @@ type Config struct {
 	App struct {
 		Name   string
 		Mode   string
+		Port   string
 		Cookie string
 	}
 	Mysql mysql

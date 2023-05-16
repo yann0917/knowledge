@@ -46,7 +46,7 @@ type User struct {
 	Location    string `json:"location"`
 	Alias       string `json:"alias,omitempty"`
 	Number      int    `json:"number,omitempty"`
-	UniqueId    string `json:"unique_id"`
+	UniqueId    string `json:"unique_id,omitempty"`
 }
 
 type T2 struct {
@@ -122,23 +122,17 @@ type Topics struct {
 			Owner      User   `json:"owner"`
 		} `json:"latest_likes"`
 		ShowComments []struct {
-			CommentId       int64  `json:"comment_id"`
-			CreateTime      string `json:"create_time"`
-			Owner           User   `json:"owner"`
-			Text            string `json:"text"`
-			LikesCount      int    `json:"likes_count"`
-			RewardsCount    int    `json:"rewards_count"`
-			Sticky          bool   `json:"sticky"`
-			RepliesCount    int    `json:"replies_count,omitempty"`
-			ParentCommentId int64  `json:"parent_comment_id,omitempty"`
-			Repliee         struct {
-				UserId      int64  `json:"user_id"`
-				Name        string `json:"name"`
-				AvatarUrl   string `json:"avatar_url"`
-				Description string `json:"description,omitempty"`
-				Alias       string `json:"alias,omitempty"`
-			} `json:"repliee,omitempty"`
-			Images []Image `json:"images,omitempty"`
+			CommentId       int64   `json:"comment_id"`
+			CreateTime      string  `json:"create_time"`
+			Owner           User    `json:"owner"`
+			Text            string  `json:"text"`
+			LikesCount      int     `json:"likes_count"`
+			RewardsCount    int     `json:"rewards_count"`
+			Sticky          bool    `json:"sticky"`
+			RepliesCount    int     `json:"replies_count,omitempty"`
+			ParentCommentId int64   `json:"parent_comment_id,omitempty"`
+			Repliee         User    `json:"repliee,omitempty"`
+			Images          []Image `json:"images,omitempty"`
 		} `json:"show_comments,omitempty"`
 		LikesCount    int    `json:"likes_count"`
 		RewardsCount  int    `json:"rewards_count"`
@@ -166,14 +160,9 @@ type Topic struct {
 	Group   Group  `json:"group"`
 	Type    string `json:"type"`
 	Talk    struct {
-		Owner   User   `json:"owner"`
-		Text    string `json:"text"`
-		Article struct {
-			Title            string `json:"title"`
-			ArticleId        string `json:"article_id"`
-			ArticleUrl       string `json:"article_url"`
-			InlineArticleUrl string `json:"inline_article_url"`
-		} `json:"article"`
+		Owner   User    `json:"owner"`
+		Text    string  `json:"text"`
+		Article Article `json:"article"`
 	} `json:"talk"`
 	LatestLikes []struct {
 		CreateTime string `json:"create_time"`

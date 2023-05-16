@@ -5,8 +5,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
+	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -43,6 +45,58 @@ func PathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// String2Int 字符串 转 int
+func String2Int(str string) (int, error) {
+	return strconv.Atoi(str)
+}
+
+// String2Int64 字符串 转 int64
+func String2Int64(str string) (int64, error) {
+	return strconv.ParseInt(str, 10, 64)
+}
+
+// String2Uint string 转 uint
+func String2Uint(str string) uint {
+	u64, _ := strconv.ParseUint(str, 10, 0)
+	return uint(u64)
+}
+
+// Int2String int 转 string
+func Int2String(intval int) string {
+	return strconv.Itoa(intval)
+}
+
+// Int642String int64 转 string
+func Int642String(intval int64) string {
+	return strconv.FormatInt(intval, 10)
+}
+
+func Uint642String(intval uint64) string {
+	return strconv.FormatUint(intval, 10)
+}
+
+// Byte2String 字节数组转 string
+func Byte2String(b []byte) string {
+	return *(*string)(unsafe.Pointer(&b))
+}
+
+// Float642String float64 转 string
+func Float642String(v float64, p int) string {
+	return strconv.FormatFloat(v, 'f', p, 64)
+}
+
+// String2Float64 string 转 float64
+func String2Float64(str string) (float64, error) {
+	return strconv.ParseFloat(str, 64)
+}
+
+func Bool2Int(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func substr(s string, pos, length int) string {

@@ -1,6 +1,7 @@
 app:
   name: knowledge
   env: dev
+  port: 8000
   cookie: "zsxq_access_token=807D1F00-CA38-CCB3-216A-FDFF6E685088_641F5E91EBDB0A8C; abtest_env=product; zsxqsessionid=a7652281175d8be4d1a2a6375391af63"
 mysql:
   host: 127.0.0.1
@@ -9,5 +10,3 @@ mysql:
   password: "password"
   database: "database"
   dump: true
-
-
