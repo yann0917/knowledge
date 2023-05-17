@@ -1,17 +1,21 @@
 package models
 
 import (
+	"time"
+
 	"github.com/yann0917/knowledge/base"
 	"github.com/yann0917/knowledge/config"
 )
 
 type Group struct {
-	ID        int           `json:"id"`
-	GroupID   int64         `json:"group_id"`
-	Name      string        `json:"name"`
-	CreatedAt base.JSONTime `json:"created_at"`
-	UpdatedAt base.JSONTime `json:"updated_at"`
-	DeletedAt base.JSONTime `json:"-"`
+	ID          int           `json:"id"`
+	GroupID     int64         `json:"group_id"`
+	Name        string        `json:"name"`
+	Description string        `json:"description"`
+	CreatedTime time.Time     `json:"created_time"`
+	CreatedAt   base.JSONTime `json:"created_at"`
+	UpdatedAt   base.JSONTime `json:"updated_at"`
+	DeletedAt   base.JSONTime `json:"-"`
 }
 
 func (g *Group) TableName() string {
@@ -22,8 +26,10 @@ func (g *Group) TableName() string {
 func (g *Group) FirstOrUpdate() (detail Group, err error) {
 	if err = config.DB.Where(&Group{GroupID: g.GroupID}).
 		Assign(&Group{
-			GroupID: g.GroupID,
-			Name:    g.Name,
+			GroupID:     g.GroupID,
+			Name:        g.Name,
+			Description: g.Description,
+			CreatedTime: g.CreatedTime,
 		}).
 		FirstOrCreate(&detail).Error; err != nil {
 		return

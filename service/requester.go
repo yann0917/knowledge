@@ -49,6 +49,26 @@ func (s *Service) GetGroups() (list Groups, err error) {
 	return
 }
 
+func (s *Service) GetGroupInfo(groupID string) (info GroupInfoResp, err error) {
+	resp, err := s.client.R().
+		SetPathParams(map[string]string{
+			"group_id": groupID,
+		}).
+		Get("/groups/{group_id}")
+	if err != nil {
+		return
+	}
+	body, err := handleHTTPResponse(resp, err)
+	if err != nil {
+		return
+	}
+	defer body.Close()
+	if err = handleJSONParse(body, &info); err != nil {
+		return
+	}
+	return
+}
+
 func (s *Service) GetMenus(groupID string) (list Menus, err error) {
 	resp, err := s.client.R().
 		SetPathParams(map[string]string{

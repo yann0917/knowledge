@@ -22,9 +22,8 @@ func InitRouter() *gin.Engine {
 		zsxq.GET("/sync/group", SyncGroups)
 		zsxq.GET("/sync/:id/topic", SyncTopics)
 		zsxq.GET("/sync/:id/column", SyncColumns)
-		// zsxq.GET("/sync/:id/column/:column", SyncColumnTopics)
-		// zsxq.GET("/sync/:id", SyncTopicInfo)
 		zsxq.GET("/article", GetArticle)
+		zsxq.GET("/:id/column/topic", GetColumnTopics)
 	}
 
 	return r

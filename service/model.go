@@ -39,6 +39,77 @@ type Group struct {
 	BackgroundURL string `json:"background_url"`
 }
 
+type GroupInfoResp struct {
+	Group GroupInfo `json:"group"`
+}
+
+type GroupInfo struct {
+	GroupId                          int64  `json:"group_id"`
+	Number                           int    `json:"number"`
+	Name                             string `json:"name"`
+	Description                      string `json:"description"`
+	CreateTime                       string `json:"create_time"`
+	UpdateTime                       string `json:"update_time"`
+	PrivilegeUserLastTopicCreateTime string `json:"privilege_user_last_topic_create_time"`
+	LatestTopicCreateTime            string `json:"latest_topic_create_time"`
+	AliveTime                        string `json:"alive_time"`
+	BackgroundUrl                    string `json:"background_url"`
+	Type                             string `json:"type"`
+	RiskLevel                        string `json:"risk_level"`
+	Category                         struct {
+		CategoryId int    `json:"category_id"`
+		Title      string `json:"title"`
+	} `json:"category"`
+	Owner      User          `json:"owner"`
+	AdminIds   []int64       `json:"admin_ids"`
+	GuestIds   []int64       `json:"guest_ids"`
+	PartnerIds []int64       `json:"partner_ids"`
+	Promos     []interface{} `json:"promos"`
+	Policies   struct {
+		NeedExamine             bool   `json:"need_examine"`
+		EnableScoreboard        bool   `json:"enable_scoreboard"`
+		FreeQuestionsLimitCount int    `json:"free_questions_limit_count"`
+		EnableMemberNumber      bool   `json:"enable_member_number"`
+		MembersVisibility       string `json:"members_visibility"`
+		AllowSharing            bool   `json:"allow_sharing"`
+		AllowPrivateChat        bool   `json:"allow_private_chat"`
+		AllowSearch             bool   `json:"allow_search"`
+		AllowJoin               bool   `json:"allow_join"`
+		AllowAnonymousQuestion  bool   `json:"allow_anonymous_question"`
+		SilenceNewMember        bool   `json:"silence_new_member"`
+		EnableWatermark         bool   `json:"enable_watermark"`
+		ParseBookTitle          bool   `json:"parse_book_title"`
+		AllowCopy               bool   `json:"allow_copy"`
+		AllowDownload           bool   `json:"allow_download"`
+		EnableIap               bool   `json:"enable_iap"`
+	} `json:"policies"`
+	Privileges struct {
+		AccessGroupData     string `json:"access_group_data"`
+		AccessIncomesData   string `json:"access_incomes_data"`
+		AccessWeeklyReports string `json:"access_weekly_reports"`
+		CreateTopic         string `json:"create_topic"`
+		CreateComment       string `json:"create_comment"`
+	} `json:"privileges"`
+	Statistics struct {
+		Topics struct {
+			TopicsCount  int `json:"topics_count"`
+			AnswersCount int `json:"answers_count"`
+			DigestsCount int `json:"digests_count"`
+		} `json:"topics"`
+		Files struct {
+			Count int `json:"count"`
+		} `json:"files"`
+		Members struct {
+			Count int `json:"count"`
+		} `json:"members"`
+	} `json:"statistics"`
+	UserSpecific struct {
+		JoinTime        string `json:"join_time"`
+		RewardedOwner   bool   `json:"rewarded_owner"`
+		EnableFootprint bool   `json:"enable_footprint"`
+	} `json:"user_specific"`
+}
+
 type Groups struct {
 	Groups []Group `json:"groups"`
 }

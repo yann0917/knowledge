@@ -1,10 +1,12 @@
 package base
 
 import (
+	"fmt"
 	"io"
 	"net/url"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -13,7 +15,6 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-const UserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36"
 const format = "2006-01-02T15:04:05.000+0800"
 const TimeZone = "Asia/Shanghai"
 
@@ -30,7 +31,7 @@ func StrToTime(s string) time.Time {
 	return t
 }
 
-func StrToTimeUtf8(s string) time.Time {
+func StrToTimeUtc8(s string) time.Time {
 	var cst0, _ = time.LoadLocation(TimeZone)
 	t, _ := time.ParseInLocation(format, s, cst0)
 	return t
@@ -130,4 +131,87 @@ func UnmarshalReader(r io.Reader, v interface{}) error {
 // UnmarshalJSON 将 data 中的 json 格式的数据, 解析到 v
 func UnmarshalJSON(data []byte, v interface{}) error {
 	return jsoniter.Unmarshal(data, v)
+}
+
+// FileName filter invalid string
+func FileName(name, ext string) string {
+	rep := strings.NewReplacer("\n", " ", "/", " ", "|", "-", ": ", "：", ":", "：", "'", "’", "\t", " ")
+	name = rep.Replace(name)
+
+	if runtime.GOOS == "windows" {
+		rep = strings.NewReplacer("\"", " ", "?", " ", "*", " ", "\\", " ", "<", " ", ">", " ", ":", " ", "：", " ")
+		name = rep.Replace(name)
+	}
+
+	name = strings.TrimSpace(name)
+
+	limitedName := LimitLength(name, 80)
+	if ext != "" {
+		return fmt.Sprintf("%s.%s", limitedName, ext)
+	}
+	return limitedName
+}
+
+// LimitLength cut string
+func LimitLength(s string, length int) string {
+	ellipses := "..."
+
+	str := []rune(s)
+	if len(str) > length {
+		s = string(str[:length-len(ellipses)]) + ellipses
+	}
+
+	return s
+}
+
+// FilePath gen valid file path
+func FilePath(name, ext string, escape bool) (string, error) {
+	var outputPath string
+
+	fileName := name
+	if escape {
+		fileName = FileName(name, ext)
+	} else {
+		if ext != "" {
+			fileName = fmt.Sprintf("%s.%s", name, ext)
+		}
+	}
+	outputPath = filepath.Join(fileName)
+	return outputPath, nil
+}
+
+// Mkdir mkdir path
+func Mkdir(elem ...string) (string, error) {
+	path := filepath.Join(elem...)
+
+	err := os.MkdirAll(path, os.ModePerm)
+
+	return path, err
+}
+
+// FileSize return the file size of the specified path file
+func FileSize(filePath string) (int, bool, error) {
+	file, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return 0, false, nil
+		}
+		return 0, false, err
+	}
+	return int(file.Size()), true, nil
+}
+
+func GetMdHeader(level int) string {
+	heads := map[int]string{
+		1: "# ",
+		2: "## ",
+		3: "### ",
+		4: "#### ",
+		5: "##### ",
+		6: "###### ",
+	}
+	if s, ok := heads[level]; ok {
+		return s
+	}
+	return ""
 }
