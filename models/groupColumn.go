@@ -50,7 +50,7 @@ func (g *GroupColumn) FirstOrUpdate() (detail GroupColumn, err error) {
 func (g *GroupColumn) List() (list []GroupColumn, err error) {
 	db := config.DB.Order("created_at ASC").Where(g).
 		Preload("Topics", func(db *gorm.DB) *gorm.DB {
-			return db.Order("topic.create_time DESC")
+			return db.Not("content", "").Order("topic.create_time DESC")
 		})
 	err = db.Find(&list).Error
 	return
@@ -61,23 +61,37 @@ func (g *GroupColumn) ConvertToMd(list []GroupColumn) (res string) {
 		res += base.GetMdHeader(1) + column.Name + "\r\n\r\n"
 
 		for _, topic := range column.Topics {
+			Content := topic.Content
+
+			if topic.Content != "" {
+				// replace mention, hashtag tag
+				reg := `<e type="mention"[^>]*>.*?|<e type="mention".*? \/>`
+				matches := regexp.MustCompile(reg).FindAllString(Content, -1)
+				for _, match := range matches {
+					Content = strings.ReplaceAll(Content, match, "")
+				}
+
+				reg = `<e type="hashtag"[^>]*>.*?|<e type="hashtag".*? \/>`
+				matches = regexp.MustCompile(reg).FindAllString(Content, -1)
+				for _, match := range matches {
+					Content = strings.ReplaceAll(Content, match, "")
+				}
+			}
 			if topic.Title != "" {
 				res += base.GetMdHeader(2) + topic.Title + "\r\n\r\n"
 			} else {
-				if topic.Content != "" {
-					cont := []rune(topic.Content)
+				if Content != "" {
+					cont := []rune(Content)
 					res += base.GetMdHeader(2) + string(cont[0:10]) + "\r\n\r\n"
 				} else {
 					res += base.GetMdHeader(2) + base.Int642String(topic.TopicID) + "\r\n\r\n"
 				}
 			}
-
 			res += "> 创建时间: " + base.TimeToStr(topic.CreateTime) + "\r\n\r\n"
 
-			if topic.Content != "" {
-				reg := `<e type="web"[^>]*>.*?|<.*? \/>`
-				matches := regexp.MustCompile(reg).FindAllString(topic.Content, -1)
-				Content := topic.Content
+			if Content != "" {
+				reg := `<e type="web"[^>]*>.*?|<e type="web".*? \/>`
+				matches := regexp.MustCompile(reg).FindAllString(Content, -1)
 				for _, match := range matches {
 					reg2 := `href="(.*?)" title="(.*?)"`
 					matches2 := regexp.MustCompile(reg2).FindAllStringSubmatch(match, -1)
