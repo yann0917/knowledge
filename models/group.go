@@ -37,7 +37,13 @@ func (g *Group) FirstOrUpdate() (detail Group, err error) {
 	return
 }
 
-func (g *Group) List(list []Group, err error) {
+func (g *Group) Detail() (detail Group, err error) {
+	db := config.DB.Where(g)
+	err = db.First(&detail).Error
+	return
+}
+
+func (g *Group) List() (list []Group, err error) {
 	db := config.DB.Order("created_at DESC")
 	err = db.Find(&list).Error
 	return

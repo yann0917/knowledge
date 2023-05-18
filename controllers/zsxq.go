@@ -231,8 +231,16 @@ func GetColumnTopics(c *gin.Context) {
 		ctl.Error(err)
 		return
 	}
+
+	var g models.Group
+	g.GroupID = gc.GroupID
+	detail, err := g.Detail()
+	if err != nil {
+		ctl.Error(err)
+		return
+	}
 	res := gc.ConvertToMd(list)
-	name := base.FileName(groupID, "md")
+	name := base.FileName(detail.Name, "md")
 	path, err := base.Mkdir(base.GetCurrentDirectory())
 	if err != nil {
 		ctl.Error(err)

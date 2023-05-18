@@ -120,6 +120,7 @@ func (g *GroupColumn) ConvertToMd(list []GroupColumn) (res string) {
 				res += base.GetMdHeader(3) + "文章" + "\r\n\r\n"
 				res += topic.RichContent + "\r\n\r\n"
 			}
+			res += `<div style="page-break-after: always;"></div>` + "\r\n\r\n"
 		}
 	}
 	return
