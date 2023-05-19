@@ -73,7 +73,7 @@ func (g *Topic) List() (list []Topic, err error) {
 }
 
 func (g *Topic) GetLast() (detail Topic, err error) {
-	db := config.DB.Where(g).Order("created_time asc")
+	db := config.DB.Where(g).Order("create_time asc")
 	err = db.
 		First(&detail).
 		Error
@@ -81,7 +81,7 @@ func (g *Topic) GetLast() (detail Topic, err error) {
 }
 
 func (g *Topic) GetLatest() (detail Topic, err error) {
-	db := config.DB.Where(g).Order("created_time desc")
+	db := config.DB.Where(g).Order("create_time desc")
 	err = db.
 		First(&detail).
 		Error
