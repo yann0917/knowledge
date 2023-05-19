@@ -23,7 +23,7 @@ func InitRouter() *gin.Engine {
 		zsxq.GET("/sync/:id/topic", SyncTopics)
 		zsxq.GET("/sync/:id/column", SyncColumns)
 		zsxq.GET("/article", GetArticle)
-		zsxq.GET("/:id/column/topic", GetColumnTopics)
+		zsxq.GET("/:id/:scope/topic", GetTopics)
 	}
 
 	return r

@@ -215,3 +215,27 @@ func GetMdHeader(level int) string {
 	}
 	return ""
 }
+
+func SaveFile(name, content string) (err error) {
+	path, err := Mkdir(GetCurrentDirectory())
+	if err != nil {
+		return
+	}
+	fileName := filepath.Join(path, name)
+	// _, exist, err := base.FileSize(fileName)
+	// if exist {
+	// 	fmt.Printf("\033[33;1m%s\033[0m\n", "已存在")
+	// }
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return
+	}
+	_, err = f.WriteString(content)
+	if err != nil {
+		return
+	}
+	if err = f.Close(); err != nil {
+		return
+	}
+	return
+}

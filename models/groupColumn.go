@@ -87,7 +87,7 @@ func (g *GroupColumn) ConvertToMd(list []GroupColumn) (res string) {
 					res += base.GetMdHeader(2) + base.Int642String(topic.TopicID) + "\r\n\r\n"
 				}
 			}
-			res += "> 创建时间: " + base.TimeToStr(topic.CreateTime) + "\r\n\r\n"
+			res += "> 创建时间: " + topic.CreateTime.Format("2006-01-02 15:04:05") + "\r\n\r\n"
 
 			if Content != "" {
 				reg := `<e type="web"[^>]*>.*?|<e type="web".*? \/>`

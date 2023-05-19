@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"errors"
-	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -221,50 +219,57 @@ func GetArticle(c *gin.Context) {
 
 }
 
-func GetColumnTopics(c *gin.Context) {
+func GetTopics(c *gin.Context) {
 	ctl := base.NewController(c)
-	groupID := c.Param("id")
-	var gc models.GroupColumn
-	gc.GroupID, _ = base.String2Int64(groupID)
-	list, err := gc.List()
-	if err != nil {
-		ctl.Error(err)
-		return
-	}
+	id := c.Param("id")
+	scope := c.Param("scope")
 
+	groupID, _ := base.String2Int64(id)
 	var g models.Group
-	g.GroupID = gc.GroupID
+	g.GroupID = groupID
 	detail, err := g.Detail()
 	if err != nil {
 		ctl.Error(err)
 		return
 	}
-	res := gc.ConvertToMd(list)
-	name := base.FileName(detail.Name, "md")
-	path, err := base.Mkdir(base.GetCurrentDirectory())
-	if err != nil {
-		ctl.Error(err)
-		return
-	}
-	fileName := filepath.Join(path, name)
-	// _, exist, err := base.FileSize(fileName)
-	// if exist {
-	// 	fmt.Printf("\033[33;1m%s\033[0m\n", "已存在")
-	// }
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		ctl.Error(err)
-		return
-	}
-	_, err = f.WriteString(res)
-	if err != nil {
-		ctl.Error(err)
-		return
-	}
-	if err = f.Close(); err != nil {
+
+	switch scope {
+	case "column":
+		var gc models.GroupColumn
+		gc.GroupID = groupID
+		list, err1 := gc.List()
+		if err1 != nil {
+			ctl.Error(err1)
+			return
+		}
+
+		res := gc.ConvertToMd(list)
+		name := base.FileName(detail.Name+"-导读分类", "md")
+		err = base.SaveFile(name, res)
 		if err != nil {
 			ctl.Error(err)
+			return
 		}
+		ctl.Success(list)
+	case "digest":
+		var t models.Topic
+		t.GroupID = groupID
+		t.IsDigests = true
+
+		list, err1 := t.List()
+		if err1 != nil {
+			ctl.Error(err1)
+			return
+		}
+
+		res := t.ConvertToMd(list)
+		name := base.FileName(detail.Name+"-精华主题", "md")
+		err = base.SaveFile(name, res)
+		if err != nil {
+			ctl.Error(err)
+			return
+		}
+		ctl.Success(list)
 	}
-	ctl.Success(list)
+
 }
