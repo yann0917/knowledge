@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bytes"
 	"errors"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -224,6 +226,9 @@ func GetTopics(c *gin.Context) {
 	id := c.Param("id")
 	scope := c.Param("scope")
 
+	// 1-md, 2-pdf
+	dtype := c.DefaultQuery("type", "1")
+
 	groupID, _ := base.String2Int64(id)
 	var g models.Group
 	g.GroupID = groupID
@@ -235,39 +240,67 @@ func GetTopics(c *gin.Context) {
 
 	switch scope {
 	case "column":
+		title := detail.Name + "-导读分类"
 		var gc models.GroupColumn
 		gc.GroupID = groupID
-		list, err1 := gc.List()
+		list, err1 := gc.List(true)
 		if err1 != nil {
 			ctl.Error(err1)
 			return
 		}
 
-		res := gc.ConvertToMd(list)
-		name := base.FileName(detail.Name+"-导读分类", "md")
-		err = base.SaveFile(name, res)
-		if err != nil {
-			ctl.Error(err)
-			return
+		switch dtype {
+		case "1":
+			res := gc.ConvertToMd(list)
+			name := base.FileName(title, "md")
+			err = base.SaveFile(name, res)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
+		case "2":
 		}
+
 		ctl.Success(list)
 	case "digest":
+
+		title := detail.Name + "-精华主题"
 		var t models.Topic
 		t.GroupID = groupID
 		t.IsDigests = true
 
-		list, err1 := t.List()
+		list, err1 := t.List(true)
 		if err1 != nil {
 			ctl.Error(err1)
 			return
 		}
 
-		res := t.ConvertToMd(list)
-		name := base.FileName(detail.Name+"-精华主题", "md")
-		err = base.SaveFile(name, res)
-		if err != nil {
-			ctl.Error(err)
-			return
+		switch dtype {
+
+		case "1":
+			res := models.ConvertToMd(list)
+			name := base.FileName(title, "md")
+			err = base.SaveFile(name, res)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
+		case "2":
+			buf := new(bytes.Buffer)
+			res := models.ConvertToHtml(list)
+			buf.Write([]byte(res))
+			path := base.GetCurrentDirectory()
+			filePreName := filepath.Join(path, base.FileName(title, ""))
+			fileName, err := base.FilePath(filePreName, "pdf", false)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
+			err = base.GenPdf(buf, fileName)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
 		}
 		ctl.Success(list)
 	}

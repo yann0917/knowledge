@@ -222,7 +222,7 @@ func SaveFile(name, content string) (err error) {
 		return
 	}
 	fileName := filepath.Join(path, name)
-	// _, exist, err := base.FileSize(fileName)
+	// _, exist, err := FileSize(fileName)
 	// if exist {
 	// 	fmt.Printf("\033[33;1m%s\033[0m\n", "已存在")
 	// }
@@ -238,4 +238,37 @@ func SaveFile(name, content string) (err error) {
 		return
 	}
 	return
+}
+
+func CheckFileExist(filename string) bool {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+func WriteFileWithTrunc(filename, content string) (err error) {
+
+	var f *os.File
+	if CheckFileExist(filename) {
+		f, err = os.OpenFile(filename, os.O_RDWR|os.O_TRUNC|os.O_CREATE, 0666)
+
+		if err != nil {
+			return
+		}
+	} else {
+		f, err = os.Create(filename)
+		if err != nil {
+			return
+		}
+	}
+	defer f.Close()
+	_, err = io.WriteString(f, content)
+	if err != nil {
+		return
+	}
+
+	err = f.Sync()
+	return
+
 }

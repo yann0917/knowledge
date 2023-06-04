@@ -66,9 +66,55 @@ func (g *Topic) FirstOrUpdate() (detail Topic, err error) {
 	return
 }
 
-func (g *Topic) List() (list []Topic, err error) {
+func (g *Topic) List(filterTag bool) (list []Topic, err error) {
 	db := config.DB.Order("create_time DESC").Where(g)
 	err = db.Find(&list).Error
+	if filterTag {
+		list = TopicsReplaceTag(list)
+	}
+	return
+}
+
+// TopicsReplaceTag replace mention, hashtag, web tag
+func TopicsReplaceTag(list []Topic) (topics []Topic) {
+	for i, topic := range list {
+		Content := topic.Content
+		if topic.Content != "" {
+			// replace mention, hashtag tag
+			reg := `<e type="mention"[^>]*>.*?|<e type="mention".*? \/>`
+			matches := regexp.MustCompile(reg).FindAllString(Content, -1)
+			for _, match := range matches {
+				Content = strings.ReplaceAll(Content, match, "")
+			}
+
+			reg = `<e type="hashtag"[^>]*>.*?|<e type="hashtag".*? \/>`
+			matches = regexp.MustCompile(reg).FindAllString(Content, -1)
+			for _, match := range matches {
+				Content = strings.ReplaceAll(Content, match, "")
+			}
+		}
+
+		// replace web tag with a tag
+		if Content != "" {
+			reg := `<e type="web"[^>]*>.*?|<e type="web".*? \/>`
+			matches := regexp.MustCompile(reg).FindAllString(Content, -1)
+			for _, match := range matches {
+				reg2 := `href="(.*?)" title="(.*?)"`
+				matches2 := regexp.MustCompile(reg2).FindAllStringSubmatch(match, -1)
+				if len(matches2) > 0 {
+					result := matches2[0]
+					if len(result) == 3 {
+						href, _ := url.PathUnescape(result[1])
+						title, _ := url.PathUnescape(result[2])
+						newText := "<a href='" + href + "' target='_black'>" + title + "</a>"
+						Content = strings.ReplaceAll(Content, match, newText)
+					}
+				}
+			}
+		}
+		list[i].Content = Content
+	}
+	topics = list
 	return
 }
 
@@ -88,23 +134,23 @@ func (g *Topic) GetLatest() (detail Topic, err error) {
 	return
 }
 
-func (g *Topic) ConvertToMd(list []Topic) (res string) {
+// FirstOrUpdate 创建或更新
+func (g *ColumnTopic) FirstOrUpdate() (detail ColumnTopic, err error) {
+	if err = config.DB.Where(&ColumnTopic{TopicID: g.TopicID}).
+		Assign(&ColumnTopic{
+			TopicID:              g.TopicID,
+			ColumnID:             g.ColumnID,
+			AttachedToColumnTime: g.AttachedToColumnTime,
+		}).
+		FirstOrCreate(&detail).Error; err != nil {
+		return
+	}
+	return
+}
+
+func ConvertToMd(list []Topic) (res string) {
 	for _, topic := range list {
 		Content := topic.Content
-		if topic.Content != "" {
-			// replace mention, hashtag tag
-			reg := `<e type="mention"[^>]*>.*?|<e type="mention".*? \/>`
-			matches := regexp.MustCompile(reg).FindAllString(Content, -1)
-			for _, match := range matches {
-				Content = strings.ReplaceAll(Content, match, "")
-			}
-
-			reg = `<e type="hashtag"[^>]*>.*?|<e type="hashtag".*? \/>`
-			matches = regexp.MustCompile(reg).FindAllString(Content, -1)
-			for _, match := range matches {
-				Content = strings.ReplaceAll(Content, match, "")
-			}
-		}
 		if topic.Title != "" {
 			res += base.GetMdHeader(2) + topic.Title + "\r\n\r\n"
 		} else {
@@ -116,26 +162,7 @@ func (g *Topic) ConvertToMd(list []Topic) (res string) {
 			}
 		}
 		res += "> 创建时间: " + topic.CreateTime.Format("2006-01-02 15:04:05") + "\r\n\r\n"
-
-		if Content != "" {
-			reg := `<e type="web"[^>]*>.*?|<e type="web".*? \/>`
-			matches := regexp.MustCompile(reg).FindAllString(Content, -1)
-			for _, match := range matches {
-				reg2 := `href="(.*?)" title="(.*?)"`
-				matches2 := regexp.MustCompile(reg2).FindAllStringSubmatch(match, -1)
-				if len(matches2) > 0 {
-					result := matches2[0]
-					if len(result) == 3 {
-						href, _ := url.PathUnescape(result[1])
-						title, _ := url.PathUnescape(result[2])
-						newText := "[" + title + "](" + href + ")"
-						Content = strings.ReplaceAll(Content, match, newText)
-					}
-				}
-			}
-			res += Content + "\r\n\r\n"
-		}
-
+		res += Content + "\r\n\r\n"
 		if topic.Images != "" {
 			imgs := strings.Split(topic.Images, ",")
 			for _, img := range imgs {
@@ -153,16 +180,36 @@ func (g *Topic) ConvertToMd(list []Topic) (res string) {
 	return
 }
 
-// FirstOrUpdate 创建或更新
-func (g *ColumnTopic) FirstOrUpdate() (detail ColumnTopic, err error) {
-	if err = config.DB.Where(&ColumnTopic{TopicID: g.TopicID}).
-		Assign(&ColumnTopic{
-			TopicID:              g.TopicID,
-			ColumnID:             g.ColumnID,
-			AttachedToColumnTime: g.AttachedToColumnTime,
-		}).
-		FirstOrCreate(&detail).Error; err != nil {
-		return
+func ConvertToHtml(list []Topic) (res string) {
+	res = base.GenStartHtml()
+	for _, topic := range list {
+		Content := topic.Content
+		if topic.Title != "" {
+			res += base.GenHLevelHtml(0, true) + topic.Title + base.GenHLevelHtml(0, false)
+		} else {
+			if Content != "" {
+				cont := []rune(Content)
+				res += base.GenHLevelHtml(0, true) + string(cont[0:10]) + base.GenHLevelHtml(0, false)
+			} else {
+				res += base.GenHLevelHtml(0, true) + base.Int642String(topic.TopicID) + base.GenHLevelHtml(0, false)
+			}
+		}
+		res += "<p> 创建时间: " + topic.CreateTime.Format("2006-01-02 15:04:05") + "</p>\r\n\r\n"
+		res += Content
+		if topic.Images != "" {
+			imgs := strings.Split(topic.Images, ",")
+			for _, img := range imgs {
+				res += "<img src='" + img + "' alt='' />"
+			}
+		}
+
+		if topic.RichContent != "" {
+			res += "\r\n"
+			res += base.GenHLevelHtml(1, true) + "文章" + base.GenHLevelHtml(1, false)
+			res += topic.RichContent + "\r\n"
+		}
+		res += base.GenPageBreak()
 	}
+	res += base.GenEndHtml()
 	return
 }
