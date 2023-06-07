@@ -226,7 +226,7 @@ func SaveFile(name, content string) (err error) {
 	// if exist {
 	// 	fmt.Printf("\033[33;1m%s\033[0m\n", "已存在")
 	// }
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return
 	}

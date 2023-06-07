@@ -181,20 +181,26 @@ func ConvertToMd(list []Topic) (res string) {
 }
 
 func ConvertToHtml(list []Topic) (res string) {
-	res = base.GenStartHtml()
 	for _, topic := range list {
 		Content := topic.Content
 		if topic.Title != "" {
-			res += base.GenHLevelHtml(0, true) + topic.Title + base.GenHLevelHtml(0, false)
+			res += base.GenHLevelHtml(1, true) + topic.Title + base.GenHLevelHtml(1, false)
 		} else {
 			if Content != "" {
-				cont := []rune(Content)
-				res += base.GenHLevelHtml(0, true) + string(cont[0:10]) + base.GenHLevelHtml(0, false)
+				cont := strings.Split(Content, "\n")
+				title := ""
+				if len(cont) > 0 {
+					title = cont[0]
+				} else {
+					title = Content[0:15] + "..."
+				}
+				res += base.GenHLevelHtml(1, true) + title + base.GenHLevelHtml(1, false)
 			} else {
-				res += base.GenHLevelHtml(0, true) + base.Int642String(topic.TopicID) + base.GenHLevelHtml(0, false)
+				res += base.GenHLevelHtml(1, true) + base.Int642String(topic.TopicID) + base.GenHLevelHtml(1, false)
 			}
 		}
-		res += "<p> 创建时间: " + topic.CreateTime.Format("2006-01-02 15:04:05") + "</p>\r\n\r\n"
+		Content = strings.ReplaceAll(Content, "\n", "<br/>")
+		res += "<blockquote> 创建时间: " + topic.CreateTime.Format("2006-01-02 15:04:05") + "</blockquote>\r\n"
 		res += Content
 		if topic.Images != "" {
 			imgs := strings.Split(topic.Images, ",")
@@ -205,11 +211,12 @@ func ConvertToHtml(list []Topic) (res string) {
 
 		if topic.RichContent != "" {
 			res += "\r\n"
-			res += base.GenHLevelHtml(1, true) + "文章" + base.GenHLevelHtml(1, false)
-			res += topic.RichContent + "\r\n"
+			res += base.GenHLevelHtml(2, true) + "文章" + base.GenHLevelHtml(2, false)
+			richContent := strings.ReplaceAll(topic.RichContent, "<h1>", "<strong>")
+			richContent = strings.ReplaceAll(richContent, "</h1>", "</strong>")
+			res += `<div class="article">` + richContent + "</div>"
 		}
 		res += base.GenPageBreak()
 	}
-	res += base.GenEndHtml()
 	return
 }

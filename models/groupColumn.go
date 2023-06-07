@@ -65,3 +65,11 @@ func (g *GroupColumn) ConvertToMd(list []GroupColumn) (res string) {
 	}
 	return
 }
+
+func (g *GroupColumn) ConvertToHtml(list []GroupColumn) (res string) {
+	for _, column := range list {
+		res += base.GenHLevelHtml(0, true) + column.Name + base.GenHLevelHtml(0, false)
+		res += ConvertToHtml(column.Topics)
+	}
+	return
+}

@@ -11,6 +11,7 @@ func GenPdf(buf *bytes.Buffer, fileName string) (err error) {
 	pdfg, _ := wkhtmltopdf.NewPDFGenerator()
 
 	page := wkhtmltopdf.NewPageReader(buf)
+	page.Encoding.Set("utf-8")
 	page.FooterFontSize.Set(10)
 	page.FooterRight.Set("[page]")
 	page.DisableSmartShrinking.Set(true)

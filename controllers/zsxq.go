@@ -259,6 +259,25 @@ func GetTopics(c *gin.Context) {
 				return
 			}
 		case "2":
+			buf := new(bytes.Buffer)
+			res := base.GenStartHtml()
+			res += gc.ConvertToHtml(list)
+			res += base.GenEndHtml()
+			// name := base.FileName(title, "html")
+			// err = base.SaveFile(name, res)
+			buf.Write([]byte(res))
+			path := base.GetCurrentDirectory()
+			filePreName := filepath.Join(path, base.FileName(title, ""))
+			fileName, err := base.FilePath(filePreName, "pdf", false)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
+			err = base.GenPdf(buf, fileName)
+			if err != nil {
+				ctl.Error(err)
+				return
+			}
 		}
 
 		ctl.Success(list)
@@ -287,7 +306,11 @@ func GetTopics(c *gin.Context) {
 			}
 		case "2":
 			buf := new(bytes.Buffer)
-			res := models.ConvertToHtml(list)
+			res := base.GenStartHtml()
+			res += models.ConvertToHtml(list)
+			res += base.GenEndHtml()
+			// name := base.FileName(title, "html")
+			// err = base.SaveFile(name, res)
 			buf.Write([]byte(res))
 			path := base.GetCurrentDirectory()
 			filePreName := filepath.Join(path, base.FileName(title, ""))
