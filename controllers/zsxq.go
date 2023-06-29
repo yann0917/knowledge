@@ -60,8 +60,8 @@ func SyncTopics(c *gin.Context) {
 	}
 	if !latestTopic.CreateTime.IsZero() {
 		endTime := latestTopic.CreateTime.Add(-1 * time.Second)
-		// 拉取最新
-		pullTopicsByPeriod(id, time.Now(), endTime)
+		pullTopicsByPeriod(id, endTime, base.StrToTimeUtc8(UnixTime))
+		time.Sleep(5 * time.Second)
 
 		lastTopic, err1 := topic.GetLast()
 		if err1 != nil && !errors.Is(err1, gorm.ErrRecordNotFound) {
@@ -71,6 +71,10 @@ func SyncTopics(c *gin.Context) {
 		// 拉取之后的
 		endTime = lastTopic.CreateTime.Add(-1 * time.Second)
 		pullTopicsByPeriod(id, endTime, base.StrToTimeUtc8(UnixTime))
+
+		time.Sleep(5 * time.Second)
+		// 拉取最新
+		pullTopicsByPeriod(id, time.Now(), endTime)
 
 	} else {
 		// 全量拉取
