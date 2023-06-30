@@ -12,8 +12,24 @@ import (
 
 	_ "github.com/yann0917/knowledge/base"
 	"github.com/yann0917/knowledge/config"
+	_ "github.com/yann0917/knowledge/docs"
 	"github.com/yann0917/knowledge/router"
 )
+
+// @title           知识星球 API
+// @version         1.0
+// @description     获取知识星球 API，主题保存数据库(MySQL)，并且可以导出为文件
+
+// @contact.name   Yabo
+// @contact.email  386139859@qq.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8000
+// @BasePath  /
+
+// @securityDefinitions.basic  BasicAuth
 
 func main() {
 

@@ -1,0 +1,229 @@
+basePath: /
+definitions:
+  service.Column:
+    properties:
+      column_id:
+        type: integer
+      cover_url:
+        type: string
+      create_time:
+        type: string
+      last_topic_attach_time:
+        type: string
+      name:
+        type: string
+      statistics:
+        properties:
+          topics_count:
+            type: integer
+        type: object
+    type: object
+  service.Columns:
+    properties:
+      columns:
+        items:
+          $ref: '#/definitions/service.Column'
+        type: array
+    type: object
+  service.Group:
+    properties:
+      background_url:
+        type: string
+      group_id:
+        type: integer
+      name:
+        type: string
+      type:
+        type: string
+    type: object
+  service.Groups:
+    properties:
+      groups:
+        items:
+          $ref: '#/definitions/service.Group'
+        type: array
+    type: object
+  service.User:
+    properties:
+      alias:
+        type: string
+      avatar_url:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+      number:
+        type: integer
+      unique_id:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  service.UserInfo:
+    properties:
+      accounts:
+        properties:
+          phone:
+            properties:
+              country_code:
+                type: string
+              phone_number:
+                type: string
+            type: object
+          wechat:
+            properties:
+              avatar_url:
+                type: string
+              name:
+                type: string
+            type: object
+        type: object
+      associated_enterprise:
+        type: boolean
+      chat:
+        properties:
+          identifier:
+            type: string
+        type: object
+      identity_status:
+        type: string
+      subscribed_wechat:
+        type: boolean
+      subscriptions:
+        properties:
+          subscribed_xiaomiquanvip:
+            type: boolean
+          subscribed_xingqiusvip:
+            type: boolean
+        type: object
+      user:
+        $ref: '#/definitions/service.User'
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: 386139859@qq.com
+    name: Yabo
+  description: 获取知识星球 API，主题保存数据库(MySQL)，并且可以导出为文件
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: 知识星球 API
+  version: "1.0"
+paths:
+  /zsxq/{id}/{scope}/topic:
+    get:
+      consumes:
+      - application/json
+      description: 可生成导读分类或精华主题的 Markdown 或 PDF 版本
+      parameters:
+      - description: groupID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: column-导读分类,digest-精华主题
+        enum:
+        - column
+        - digest
+        in: path
+        name: scope
+        required: true
+        type: string
+      - description: 文件保存格式：1-Markdown,2-PDF
+        enum:
+        - "1"
+        - "2"
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Columns'
+      summary: 生成主题文件
+      tags:
+      - zsxq
+  /zsxq/sync/{id}/column:
+    get:
+      consumes:
+      - application/json
+      description: 同步群组分类主题
+      parameters:
+      - description: groupID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Columns'
+      summary: 同步群组分类主题
+      tags:
+      - zsxq
+  /zsxq/sync/{id}/topic:
+    get:
+      consumes:
+      - application/json
+      description: 同步群组所有主题
+      parameters:
+      - description: groupID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: "1"
+          schema:
+            type: string
+      summary: 同步群组所有主题
+      tags:
+      - zsxq
+  /zsxq/sync/group:
+    get:
+      consumes:
+      - application/json
+      description: 同步加入的群组列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Groups'
+      summary: 同步加入的群组
+      tags:
+      - zsxq
+  /zsxq/user/self:
+    get:
+      consumes:
+      - application/json
+      description: get user self info
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserInfo'
+      summary: user info
+      tags:
+      - zsxq
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

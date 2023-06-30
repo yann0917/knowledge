@@ -1,0 +1,350 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "获取知识星球 API，主题保存数据库(MySQL)，并且可以导出为文件",
+        "title": "知识星球 API",
+        "contact": {
+            "name": "Yabo",
+            "email": "386139859@qq.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8000",
+    "basePath": "/",
+    "paths": {
+        "/zsxq/sync/group": {
+            "get": {
+                "description": "同步加入的群组列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zsxq"
+                ],
+                "summary": "同步加入的群组",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Groups"
+                        }
+                    }
+                }
+            }
+        },
+        "/zsxq/sync/{id}/column": {
+            "get": {
+                "description": "同步群组分类主题",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zsxq"
+                ],
+                "summary": "同步群组分类主题",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "groupID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Columns"
+                        }
+                    }
+                }
+            }
+        },
+        "/zsxq/sync/{id}/topic": {
+            "get": {
+                "description": "同步群组所有主题",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zsxq"
+                ],
+                "summary": "同步群组所有主题",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "groupID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "1",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/zsxq/user/self": {
+            "get": {
+                "description": "get user self info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zsxq"
+                ],
+                "summary": "user info",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.UserInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/zsxq/{id}/{scope}/topic": {
+            "get": {
+                "description": "可生成导读分类或精华主题的 Markdown 或 PDF 版本",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zsxq"
+                ],
+                "summary": "生成主题文件",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "groupID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "column",
+                            "digest"
+                        ],
+                        "type": "string",
+                        "description": "column-导读分类,digest-精华主题",
+                        "name": "scope",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "1",
+                            "2"
+                        ],
+                        "type": "string",
+                        "description": "文件保存格式：1-Markdown,2-PDF",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/service.Columns"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "service.Column": {
+            "type": "object",
+            "properties": {
+                "column_id": {
+                    "type": "integer"
+                },
+                "cover_url": {
+                    "type": "string"
+                },
+                "create_time": {
+                    "type": "string"
+                },
+                "last_topic_attach_time": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "statistics": {
+                    "type": "object",
+                    "properties": {
+                        "topics_count": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "service.Columns": {
+            "type": "object",
+            "properties": {
+                "columns": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.Column"
+                    }
+                }
+            }
+        },
+        "service.Group": {
+            "type": "object",
+            "properties": {
+                "background_url": {
+                    "type": "string"
+                },
+                "group_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.Groups": {
+            "type": "object",
+            "properties": {
+                "groups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/service.Group"
+                    }
+                }
+            }
+        },
+        "service.User": {
+            "type": "object",
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "avatar_url": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "number": {
+                    "type": "integer"
+                },
+                "unique_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "service.UserInfo": {
+            "type": "object",
+            "properties": {
+                "accounts": {
+                    "type": "object",
+                    "properties": {
+                        "phone": {
+                            "type": "object",
+                            "properties": {
+                                "country_code": {
+                                    "type": "string"
+                                },
+                                "phone_number": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "wechat": {
+                            "type": "object",
+                            "properties": {
+                                "avatar_url": {
+                                    "type": "string"
+                                },
+                                "name": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "associated_enterprise": {
+                    "type": "boolean"
+                },
+                "chat": {
+                    "type": "object",
+                    "properties": {
+                        "identifier": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "identity_status": {
+                    "type": "string"
+                },
+                "subscribed_wechat": {
+                    "type": "boolean"
+                },
+                "subscriptions": {
+                    "type": "object",
+                    "properties": {
+                        "subscribed_xiaomiquanvip": {
+                            "type": "boolean"
+                        },
+                        "subscribed_xingqiusvip": {
+                            "type": "boolean"
+                        }
+                    }
+                },
+                "user": {
+                    "$ref": "#/definitions/service.User"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BasicAuth": {
+            "type": "basic"
+        }
+    }
+}

@@ -19,6 +19,14 @@ const PageSize = 20   //
 const PullDelay = 300 // 延迟 ms
 const UnixTime = "2006-01-02T15:04:05.000+0800"
 
+// UserSelf
+// @Summary      user info
+// @Description  get user self info
+// @Tags         zsxq
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  service.UserInfo
+// @Router       /zsxq/user/self [get]
 func UserSelf(c *gin.Context) {
 	ctl := base.NewController(c)
 	user, err := svc.GetUserSelf()
@@ -31,6 +39,13 @@ func UserSelf(c *gin.Context) {
 }
 
 // SyncGroups 同步加入的群组
+// @Summary      同步加入的群组
+// @Description  同步加入的群组列表
+// @Tags         zsxq
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  service.Groups
+// @Router       /zsxq/sync/group [get]
 func SyncGroups(c *gin.Context) {
 	ctl := base.NewController(c)
 	list, err := svc.GetGroups()
@@ -48,6 +63,14 @@ func SyncGroups(c *gin.Context) {
 }
 
 // SyncTopics 同步群组所有主题
+// @Summary      同步群组所有主题
+// @Description  同步群组所有主题
+// @Tags         zsxq
+// @Accept       json
+// @Produce      json
+// @Param        id    path     int  true  "groupID"
+// @Success      200  {string}  "1"
+// @Router       /zsxq/sync/{id}/topic [get]
 func SyncTopics(c *gin.Context) {
 	ctl := base.NewController(c)
 	id := c.Param("id")
@@ -149,6 +172,14 @@ func saveTopicsByPage(w *sync.WaitGroup, list service.Topics) {
 }
 
 // SyncColumns 同步群组分类主题
+// @Summary      同步群组分类主题
+// @Description  同步群组分类主题
+// @Tags         zsxq
+// @Accept       json
+// @Produce      json
+// @Param        id    path     int  true  "groupID"
+// @Success      200  {object}  service.Columns
+// @Router       /zsxq/sync/{id}/column [get]
 func SyncColumns(c *gin.Context) {
 	ctl := base.NewController(c)
 	id := c.Param("id")
@@ -225,6 +256,17 @@ func GetArticle(c *gin.Context) {
 
 }
 
+// GetTopics 生成主题文件
+// @Summary      生成主题文件
+// @Description  可生成导读分类或精华主题的 Markdown 或 PDF 版本
+// @Tags         zsxq
+// @Accept       json
+// @Produce      json
+// @Param        id    path     int  true  "groupID"
+// @Param        scope  path    string  true  "column-导读分类,digest-精华主题"  Enums(column, digest)
+// @Param        type   query   string  true  "文件保存格式：1-Markdown,2-PDF"  Enums(1, 2)
+// @Success      200  {object}  service.Columns
+// @Router       /zsxq/{id}/{scope}/topic [get]
 func GetTopics(c *gin.Context) {
 	ctl := base.NewController(c)
 	id := c.Param("id")
