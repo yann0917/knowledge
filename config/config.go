@@ -23,7 +23,7 @@ type (
 		Database string
 		Username string
 		Password string
-		Dump     string
+		Dump     bool
 	}
 )
 
@@ -33,6 +33,7 @@ type Config struct {
 		Mode   string
 		Port   string
 		Cookie string
+		Debug  bool
 	}
 	Mysql mysql
 }

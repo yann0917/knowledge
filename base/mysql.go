@@ -2,6 +2,9 @@ package base
 
 import (
 	"bytes"
+	"log"
+	"os"
+	"time"
 
 	"github.com/yann0917/knowledge/config"
 	"gorm.io/driver/mysql"
@@ -32,8 +35,18 @@ func newDB() (orm *gorm.DB) {
 		Logger: nil,
 		DryRun: false,
 	}
-	if config.Conf.Mysql.Dump == "true" {
-		gConf.Logger.LogMode(logger.Info)
+	if conf.Dump {
+		newLogger := logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+			logger.Config{
+				SlowThreshold:             time.Second, // Slow SQL threshold
+				LogLevel:                  logger.Info, // Log level
+				IgnoreRecordNotFoundError: false,
+				ParameterizedQueries:      false,
+				Colorful:                  true,
+			},
+		)
+		gConf.Logger = newLogger
 	}
 	orm, err = gorm.Open(mysql.Open(dsn), &gConf)
 

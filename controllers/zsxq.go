@@ -183,36 +183,51 @@ func saveTopicsByPage(w *sync.WaitGroup, list service.Topics) {
 func SyncColumns(c *gin.Context) {
 	ctl := base.NewController(c)
 	id := c.Param("id")
+	groupID, _ := base.String2Int64(id)
 	list, err := svc.GetColumns(id)
 	if err != nil {
 		ctl.Error(err)
 		return
 	}
 
+	columnMap := make(map[int64]bool)
 	for _, column := range list.Columns {
+		columnMap[column.ColumnId] = true
 		var gc models.GroupColumn
-		gc.GroupID, _ = base.String2Int64(id)
+		gc.GroupID = groupID
 		gc.ColumnID = column.ColumnId
 		gc.Name = column.Name
 		gc.CreateTime = base.StrToTimeUtc8(column.CreateTime)
 		gc.LastTopicAttachTime = base.StrToTimeUtc8(column.LastTopicAttachTime)
 		gc.CoverURL = column.CoverUrl
-		gc.FirstOrUpdate()
+		_, _ = gc.FirstOrUpdate()
+	}
+	var gc models.GroupColumn
+	gc.GroupID = groupID
+	savedList, _ := gc.BasicList()
+	for _, column := range savedList {
+		if _, ok := columnMap[column.ColumnID]; !ok {
+			_ = column.Delete()
+		}
 	}
 
+	// 只拉取近半个月内有更新的专栏
+	halfMonth := time.Now().AddDate(0, 0, -15)
 	for _, column := range list.Columns {
-		topicList, err1 := svc.GetColumnTopics(id, base.Int642String(column.ColumnId))
-		if err1 != nil {
-			ctl.Error(err1)
-			return
-		}
-		// 不要优化，否则会触发反爬虫机制报 1059 错误
-		for _, topic := range topicList.Topics {
-			var ct models.ColumnTopic
-			ct.ColumnID = column.ColumnId
-			ct.TopicID = topic.TopicId
-			ct.AttachedToColumnTime = base.StrToTimeUtc8(topic.AttachedToColumnTime)
-			ct.FirstOrUpdate()
+		if base.StrToTimeUtc8(column.LastTopicAttachTime).After(halfMonth) {
+			topicList, err1 := svc.GetColumnTopics(id, base.Int642String(column.ColumnId))
+			if err1 != nil {
+				ctl.Error(err1)
+				return
+			}
+			// 不要优化，否则会触发反爬虫机制报 1059 错误
+			for _, topic := range topicList.Topics {
+				var ct models.ColumnTopic
+				ct.ColumnID = column.ColumnId
+				ct.TopicID = topic.TopicId
+				ct.AttachedToColumnTime = base.StrToTimeUtc8(topic.AttachedToColumnTime)
+				_, _ = ct.FirstOrUpdate()
+			}
 		}
 	}
 

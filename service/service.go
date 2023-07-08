@@ -52,6 +52,7 @@ type CookieOptions struct {
 	AbtestEnv       string `json:"abtest_env" mapstructure:"abtest_env"`
 	ZsxqAccessToken string `json:"zsxq_access_token" mapstructure:"zsxq_access_token"`
 	UabCollina      string `json:"_uab_collina" mapstructure:"_uab_collina"`
+	Debug           bool   `json:"debug"`
 }
 
 // NewService new service
@@ -78,7 +79,9 @@ func NewService(co *CookieOptions) *Service {
 		Domain: "wx.zsxq.com",
 	})
 	client := resty.New()
-	client.SetDebug(true)
+	if co.Debug {
+		client.SetDebug(true)
+	}
 	client.SetBaseURL(BaseURL).
 		SetCookies(cookies).
 		SetHeader("User-Agent", UserAgent).

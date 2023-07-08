@@ -44,6 +44,17 @@ func (g *GroupColumn) FirstOrUpdate() (detail GroupColumn, err error) {
 	return
 }
 
+func (g *GroupColumn) BasicList() (list []GroupColumn, err error) {
+	db := config.DB.Order("created_at ASC").Where(g)
+	err = db.Find(&list).Error
+	return
+}
+
+func (g *GroupColumn) Delete() (err error) {
+	err = config.DB.Unscoped().Where(g).Delete(GroupColumn{}).Error
+	return
+}
+
 func (g *GroupColumn) List(filterTag bool) (list []GroupColumn, err error) {
 	db := config.DB.Order("created_at ASC").Where(g).
 		Preload("Topics", func(db *gorm.DB) *gorm.DB {
